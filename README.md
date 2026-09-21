@@ -140,13 +140,13 @@ Le passer à `False`, `APPEND_SLASH = False` dans `settings.py`, cela permettra 
 * Ajout fonction qui nous retourne une  `HttpResponse from django.http import HttpResponse`
 
 ```py
-# index.view.py
+# view.py
 from django.http import HttpResponse
 
 def index(request):
     return HttpResponse("<h1>Bonjour, bienvenue sur mn site</h1>")
 # urls.py
-from .index.view import index
+from view import index
 urlpatterns = [
     path('', index, name="index"),
 ]
@@ -188,7 +188,10 @@ def index(request):
 from django.shortcuts import render
 def index(request):
     return render(request, "index.html", context={"prenom": "Jean-Yves"})
-# index.html
+```
+
+```html
+<!--index.html-->
     <h1>Bonjour {{ prenom | upper}}, bienvenu sur mon site DJANGO</h1>
     <h2>Nous sommes le {{ date|date:"d F Y H:i:s"}}</h2>
 ```
@@ -205,6 +208,34 @@ def index(request):
 cd src
 #python manage.py startapp <NAME_APP>
 python manage.py startapp blog
+```
+
+```shell
+.
+|-- __init__.py
+|-- __pycache__
+|   |-- __init__.cpython-314.pyc
+|   |-- admin.cpython-314.pyc
+|   |-- apps.cpython-314.pyc
+|   |-- models.cpython-314.pyc
+|   |-- urls.cpython-314.pyc
+|   `-- views.cpython-314.pyc
+|-- admin.py===================================> fichier pour enregistrer les modèles dans l'interface d'administration.
+|-- apps.py====================================>fichier pour définir des configurations de l'application.
+|-- migrations=================================> dossier qui contient les fichiers de migrations des modèles.
+|   |-- __init__.py
+|   `-- __pycache__
+|       `-- __init__.cpython-314.pyc
+|-- models.py=================================> fichier dans lequel on crée les modèles de l'application
+|-- templates
+|   `-- blog
+|       |-- article_01.html
+|       |-- article_02.html
+|       |-- article_03.html
+|       |-- article_not_found.html
+|       `-- index.html
+|-- tests.py =================================>fichier pour créer les tests unitaires de l'application.
+`-- views.py =================================>fichier pour crées les vues de l'application.
 ```
 
 * Déclarer cette application dans le fichier `DocBlog/settings.py`
@@ -250,3 +281,73 @@ urlpatterns = [
 
 ### Utilisation template dans les applications du projet
 
+* Modifier `blog\views` pour remplacer le HttResponse par un render django
+* Creation du template `blog\template\index.html` appelé par la précedente view
+* Afin d'éviter d'éventuelle conflit entre les noms des templates, créer des sous dossiers à templates, puis mettre à jours vos fichier views en consequences.
+
+```py
+#\blog\views.py
+from django.shortcuts import render
+def index(request):
+    return render(request, "blog/index.html")
+```
+
+```html
+<!--blog\template\index.html-->
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Le Blog</title>
+</head>
+
+<body>
+    <h1>Le blog</h1>
+</body>
+
+</html>
+```
+
+### Ajouter la vue pour les articles du blog
+
+* Création des templates des articles `\src\blog\templates\blog\article_01.html`, `\src\blog\templates\blog\article_02.html`, `\src\blog\templates\blog\article_03.html`
+* Création d'un seul chemin avec numéro d'article dynamique:
+  * Creation de la view
+  * Modifier vos url pour ajouter un paramètre dynamique,correspondant au numéro de l'article
+  * Modifier vos view en utilisant `f-string`, pour rendre le numéro de l'article dinamique
+* Gérer une page d'erreur si le numéro d'article n'est pas trouvé:
+  * Ajouter un template `article_not_found.html`
+  * Ajouter une condition pour afficher la page d'erreur `\src\blog\views.py`
+
+```html
+<!--blog\template\article_01.html-->
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Article 01</title>
+</head>
+
+<body>
+    <h1>Article 01</h1>
+</body>
+
+</html>
+```
+
+```py
+#\src\blog\views.py
+def article(request, numero_article):
+    if numero_article in ["01", "02", "03"]:
+        return render(request, f"blog/article_{numero_article}.html")
+    return render(request, "blog/article_not_found.html")
+
+#\src\blog\urls.py
+from .views import index, article
+
+urlpatterns = [
+    path("article-<str:numero_article>/", article, name="blog-article"),
+]
+```
