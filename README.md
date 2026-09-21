@@ -4,7 +4,7 @@ TDD création d'un site web (MVC).
 
 # Django (\Flask_Django_FastAPI\DJANGO)
 
-## Prerequis et installation projet
+## Prerequis
 
 * Installer `Python` et `Django`
 * Vérifications:
@@ -17,6 +17,8 @@ python
 >>> print(django.get_version())
 #6.1.1
 ```
+
+## installation projet
 
 * Création environnement virtuel `.env`
 
@@ -80,7 +82,7 @@ django-admin startproject DocBlog
 django-admin help
 ```
 
-## Structure du projet django
+### Structure du projet django
 
 ```shell
 $ tree
@@ -98,7 +100,7 @@ $ tree
 * `DocBlog/urls.py` permet de définir les chemins des urls qui seront redirigés vers les vues.
 * `DocBlog/settings.py` définie toutes les preferences de notre application (logger, template, database ...) équivalent applciation.properties en maven.
 
-## Execution du serveur de développement (local hors production)
+### Execution du serveur de développement (local hors production)
 
 ```shell
 cd src
@@ -110,11 +112,11 @@ python manage.py runserver
 
 ![Accueil Django](DJANGO/Docs/imgs/Django.png)
 
-## Créer un chemin d'url pour afficher une vue dans notre projet
+### Créer un chemin d'url pour afficher une vue dans notre projet
 
 Exemple création d'une route retourrnant la vue pour une erreur 500
 
-```shell
+```py
 # fichier urls.py
 from django.views.defaults import server_error
 
@@ -125,7 +127,7 @@ urlpatterns = [
 # Server Error (500)
 ```
 
-## Le paramètre append_slash
+### Le paramètre append_slash
 
 Parmètrage de la variable d'environnement `append_slash`, intêret sur la résolution des chemins d'urls avec Django.
 Cela permet de faire le routage sur des urls contenant ou non le `/` de fin par default à `True`.
@@ -150,7 +152,7 @@ urlpatterns = [
 ]
 ```
 
-## Création de templates html
+### Création de templates html
 
 * Créer un dossier `templates`, (DJANGO\src\DocBlog\templates)
 * Ajouter votre dossier template dans vos settings `settings.py`
@@ -174,7 +176,7 @@ def index(request):
 
 ```
 
-## Insérer des données dans un template
+### Insérer des données dans un template
 
 1. Cas de données hard code:
    1. ajouter `context={clé: valeur}`, pour definir un catalogue de données dans `index.view.py`.
@@ -194,4 +196,57 @@ def index(request):
 * Ressources :
 [Django template filter](https://docs.djangoproject.com/en/6.1/ref/templates/builtins/#built-in-filter-reference)
 [Code language](http://www.i18nguy.com/unicode/language-identifiers.html)
+
+## Création d'une application (blog) au sein d'un projet (DocBlog), equivalent à un package dans d'autre language
+
+* Création d'une app
+  
+```shell
+cd src
+#python manage.py startapp <NAME_APP>
+python manage.py startapp blog
+```
+
+* Déclarer cette application dans le fichier `DocBlog/settings.py`
+
+```py
+#DocBlog/settings.py
+INSTALLED_APPS= [
+    'blog',
+]
+```
+
+### Définir les urls des applications (blog)
+
+* Création d'une vue simple `DJANGO\src\blog\views.py`
+* Création du fichier `blog/urls.py`
+* Modification des roots de `DocBlog\urls.py` à l'aide d'`include`
+
+```py
+#\src\blog\views.py
+from django.http import HttpResponse
+def index(request):
+    return HttpResponse("<h1>Le Blog</h1>")
+
+#\src\blog\urls.py
+from django.contrib import admin
+from django.urls import path
+from .views import index
+
+urlpatterns = [
+    path("", index, name="blog-index"),
+]
+
+#src\DocBlog\urls.py
+from django.urls import include, path
+from .index_view import index
+
+urlpatterns = [
+    path('blog/', include("blog.urls")),
+]
+```
+
+* Vérifier que l'url réponds bien : [blog](http://localhost:8000/blog/)
+
+### Utilisation template dans les applications du projet
 
