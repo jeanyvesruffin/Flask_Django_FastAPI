@@ -1,0 +1,20 @@
+{% load static %}
+<!doctype html>
+<html lang="fr">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>DJANGO</title>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+</head>
+
+<body>
+  <div class="container">
+    <h1>Bonjour {{ prenom | upper }}, bienvenu sur mon site DJANGO</h1>
+    <h2>Nous sommes le {{ date|date:"d F Y" }}</h2>
+    <h3>Il est actuellement {{ date|date:"H\hi" }}
+      <h3 />
+  </div>
+</body>
+
+</html>

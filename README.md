@@ -1,8 +1,11 @@
-# Flask_Django_FastAPI
+# Flask Django FastAPI
 
-TDD création d'un site web (MVC).
+<details>
+<summary>Django basique</summary>
 
-# Django (\Flask_Django_FastAPI\DJANGO)
+Le framework Django, est basé sur l'architecture MVT (Modèle, Vue, Template).
+
+# DJANGO
 
 ## Prerequis
 
@@ -73,6 +76,18 @@ pip install -r requirements.txt
   * Toujours source votre projet `source .env/Scripts/activate`
   * La configuration python et django se trouve dans le fichier `activate`
 
+* Execution du serveur de développement (local hors production)
+
+```shell
+cd src
+python manage.py migrate
+python manage.py runserver
+# http://127.0.0.1:8000
+# Ctrl + C pour stopper le server
+```
+
+![Accueil Django](DJANGO/Docs/imgs/Django.png)
+
 ## Création projet django (DocBlog)
 
 ```shell
@@ -100,17 +115,7 @@ $ tree
 * `DocBlog/urls.py` permet de définir les chemins des urls qui seront redirigés vers les vues.
 * `DocBlog/settings.py` définie toutes les preferences de notre application (logger, template, database ...) équivalent applciation.properties en maven.
 
-### Execution du serveur de développement (local hors production)
 
-```shell
-cd src
-python manage.py migrate
-python manage.py runserver
-# http://127.0.0.1:8000
-# Ctrl + C pour stopper le server
-```
-
-![Accueil Django](DJANGO/Docs/imgs/Django.png)
 
 ### Créer un chemin d'url pour afficher une vue dans notre projet
 
@@ -136,17 +141,17 @@ Le passer à `False`, `APPEND_SLASH = False` dans `settings.py`, cela permettra 
 
 ## Création d'une vue pour une url donnée
 
-* Création d'une vue `[index.view.py](DJANGO/src/DocBlog/index.view.py)`
+* Création d'une vue `[index.views.py](DJANGO/src/DocBlog/index.views.py)`
 * Ajout fonction qui nous retourne une  `HttpResponse from django.http import HttpResponse`
 
 ```py
-# view.py
+# views.py
 from django.http import HttpResponse
 
 def index(request):
     return HttpResponse("<h1>Bonjour, bienvenue sur mn site</h1>")
 # urls.py
-from view import index
+from views import index
 urlpatterns = [
     path('', index, name="index"),
 ]
@@ -158,7 +163,7 @@ urlpatterns = [
 * Ajouter votre dossier template dans vos settings `settings.py`
 * Ajouter un fichier `index.html` au dossier `templates`
 * Ajouter le contenu du fichier `index.html`
-* ré-écrire votre fonction index de `index.view.py`
+* ré-écrire votre fonction index de `index.views.py`
   
 ```py
 # settings.py
@@ -169,7 +174,7 @@ TEMPLATES = [
         ],
     },
 ]
-# index.view.py
+# index.views.py
 from django.shortcuts import render
 def index(request):
     return render(request, "index.html")
@@ -179,12 +184,12 @@ def index(request):
 ### Insérer des données dans un template
 
 1. Cas de données hard code:
-   1. ajouter `context={clé: valeur}`, pour definir un catalogue de données dans `index.view.py`.
+   1. ajouter `context={clé: valeur}`, pour definir un catalogue de données dans `index.views.py`.
    2. dans `index.html`, récupérer la donnée à l'aide des `{{}}`.
    3. possibilité d'ajouter un `|` pour faire un traitement sur le resultat (équivalent pipe Angular)
 
 ```py
-# index.view.py
+# index.views.py
 from django.shortcuts import render
 def index(request):
     return render(request, "index.html", context={"prenom": "Jean-Yves"})
@@ -282,7 +287,7 @@ urlpatterns = [
 ### Utilisation template dans les applications du projet
 
 * Modifier `blog\views` pour remplacer le HttResponse par un render django
-* Creation du template `blog\template\index.html` appelé par la précedente view
+* Creation du template `blog\template\index.html` appelé par la précedente views
 * Afin d'éviter d'éventuelle conflit entre les noms des templates, créer des sous dossiers à templates, puis mettre à jours vos fichier views en consequences.
 
 ```py
@@ -313,9 +318,9 @@ def index(request):
 
 * Création des templates des articles `\src\blog\templates\blog\article_01.html`, `\src\blog\templates\blog\article_02.html`, `\src\blog\templates\blog\article_03.html`
 * Création d'un seul chemin avec numéro d'article dynamique:
-  * Creation de la view
+  * Creation de la views
   * Modifier vos url pour ajouter un paramètre dynamique,correspondant au numéro de l'article
-  * Modifier vos view en utilisant `f-string`, pour rendre le numéro de l'article dinamique
+  * Modifier vos views en utilisant `f-string`, pour rendre le numéro de l'article dinamique
 * Gérer une page d'erreur si le numéro d'article n'est pas trouvé:
   * Ajouter un template `article_not_found.html`
   * Ajouter une condition pour afficher la page d'erreur `\src\blog\views.py`
@@ -351,3 +356,55 @@ urlpatterns = [
     path("article-<str:numero_article>/", article, name="blog-article"),
 ]
 ```
+
+## Gestion des fichiers statiques
+
+### Feuillee de style CSS
+
+* Ajout feuille de style CSS `\src\DocBlog\static\css\style.css`
+* Génère dynamiquement l'URL correcte vers vos fichiers statiques à l'aide tag de template Django (ou balise de template) `static`
+* Redémarrer le serveur pour charger le style CSS
+* Attention au conflit, adapter alors vos chemins dans `href`
+* Renseigner dans les `settings.py` vos styles
+
+```css
+# DJANGO\src\DocBlog\static\css\style.css
+
+body{
+    background-color: black;
+    color: aliceblue;
+}
+```
+
+```html
+<!---- \src\DocBlog\templates\DocBlog\index.html -->
+{% load static %}
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <title>DJANGO</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+  </head>
+</html>
+```
+
+```py
+# \src\DocBlog\settings.py
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, "DocBlog/static/")
+]
+```
+
+### Mise en forme
+
+* Modification du fichier css, ajout d'un background.
+
+</details>
+
+<details>
+<summary>Django avancé</summary>
+
+## Modéles et données
+
+</details>
