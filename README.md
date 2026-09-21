@@ -134,14 +134,64 @@ Le passer à `False`, `APPEND_SLASH = False` dans `settings.py`, cela permettra 
 
 ## Création d'une vue pour une url donnée
 
-* Création d'une vue `[views.p](DJANGO/src/DocBlog/views.py)`
-* Ajout fonction qui nous retourne une HttpResponse from django.http import HttpResponse
+* Création d'une vue `[index.view.py](DJANGO/src/DocBlog/index.view.py)`
+* Ajout fonction qui nous retourne une  `HttpResponse from django.http import HttpResponse`
 
 ```py
-# views.py
+# index.view.py
 from django.http import HttpResponse
-
 
 def index(request):
     return HttpResponse("<h1>Bonjour, bienvenue sur mn site</h1>")
+# urls.py
+from .index.view import index
+urlpatterns = [
+    path('', index, name="index"),
+]
 ```
+
+## Création de templates html
+
+* Créer un dossier `templates`, (DJANGO\src\DocBlog\templates)
+* Ajouter votre dossier template dans vos settings `settings.py`
+* Ajouter un fichier `index.html` au dossier `templates`
+* Ajouter le contenu du fichier `index.html`
+* ré-écrire votre fonction index de `index.view.py`
+  
+```py
+# settings.py
+TEMPLATES = [
+    {
+        'DIRS': [
+            os.path.join(BASE_DIR, "DocBlog/templates")
+        ],
+    },
+]
+# index.view.py
+from django.shortcuts import render
+def index(request):
+    return render(request, "index.html")
+
+```
+
+## Insérer des données dans un template
+
+1. Cas de données hard code:
+   1. ajouter `context={clé: valeur}`, pour definir un catalogue de données dans `index.view.py`.
+   2. dans `index.html`, récupérer la donnée à l'aide des `{{}}`.
+   3. possibilité d'ajouter un `|` pour faire un traitement sur le resultat (équivalent pipe Angular)
+
+```py
+# index.view.py
+from django.shortcuts import render
+def index(request):
+    return render(request, "index.html", context={"prenom": "Jean-Yves"})
+# index.html
+    <h1>Bonjour {{ prenom | upper}}, bienvenu sur mon site DJANGO</h1>
+    <h2>Nous sommes le {{ date|date:"d F Y H:i:s"}}</h2>
+```
+
+* Ressources :
+[Django template filter](https://docs.djangoproject.com/en/6.1/ref/templates/builtins/#built-in-filter-reference)
+[Code language](http://www.i18nguy.com/unicode/language-identifiers.html)
+
